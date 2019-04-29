@@ -7,3 +7,12 @@
 ## Usage
 
 var dictionary = JsonConvert.DeserializeObject<IDictionary<string, object>>(json, new DictionaryConverter());
+
+## Contribute
+
+#### How to publish package
+- set package version in Samhammer.DictionaryJsonConverter.csproj
+- create git tag
+- dotnet pack -c Release
+- nuget push .\bin\Release\Samhammer.DictionaryJsonConverter.*.nupkg NUGET_API_KEY -src https://api.nuget.org/v3/index.json
+- (optional) nuget setapikey NUGET_API_KEY -source https://api.nuget.org/v3/index.json
