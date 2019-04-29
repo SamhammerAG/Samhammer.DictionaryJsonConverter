@@ -7,7 +7,10 @@ namespace Samhammer.DictionaryJsonConverter
 {
     public class DictionaryConverter : JsonConverter
     {
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) { this.WriteValue(writer, value); }
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            WriteValue(writer, value);
+        }
 
         private void WriteValue(JsonWriter writer, object value)
         {
@@ -15,10 +18,10 @@ namespace Samhammer.DictionaryJsonConverter
             switch (t.Type)
             {
                 case JTokenType.Object:
-                    this.WriteObject(writer, value);
+                    WriteObject(writer, value as IDictionary<string, object>);
                     break;
                 case JTokenType.Array:
-                    this.WriteArray(writer, value);
+                    WriteArray(writer, value as IEnumerable<object>);
                     break;
                 default:
                     writer.WriteValue(value);
@@ -26,28 +29,26 @@ namespace Samhammer.DictionaryJsonConverter
             }
         }
 
-        private void WriteObject(JsonWriter writer, object value)
+        private void WriteObject(JsonWriter writer, IDictionary<string, object> obj)
         {
             writer.WriteStartObject();
-            var obj = value as IDictionary<string, object>;
 
-            foreach (var kvp in obj)
+            foreach (var pair in obj)
             {
-                writer.WritePropertyName(kvp.Key);
-                this.WriteValue(writer, kvp.Value);
+                writer.WritePropertyName(pair.Key);
+                WriteValue(writer, pair.Value);
             }
 
             writer.WriteEndObject();
         }
 
-        private void WriteArray(JsonWriter writer, object value)
+        private void WriteArray(JsonWriter writer, IEnumerable<object> array)
         {
             writer.WriteStartArray();
-            var array = value as IEnumerable<object>;
 
             foreach (var o in array)
             {
-                this.WriteValue(writer, o);
+                WriteValue(writer, o);
             }
 
             writer.WriteEndArray();
@@ -73,7 +74,7 @@ namespace Samhammer.DictionaryJsonConverter
                 case JsonToken.StartObject:
                     return ReadObject(reader);
                 case JsonToken.StartArray:
-                    return this.ReadArray(reader);
+                    return ReadArray(reader);
                 case JsonToken.Integer:
                 case JsonToken.Float:
                 case JsonToken.String:
@@ -100,7 +101,6 @@ namespace Samhammer.DictionaryJsonConverter
                         break;
                     default:
                         var v = ReadValue(reader);
-
                         list.Add(v);
                         break;
                     case JsonToken.EndArray:
@@ -128,7 +128,6 @@ namespace Samhammer.DictionaryJsonConverter
                         }
 
                         var v = ReadValue(reader);
-
                         obj[propertyName] = v;
                         break;
                     case JsonToken.Comment:
