@@ -2,11 +2,27 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 namespace Samhammer.DictionaryJsonConverter
 {
     public class DictionaryConverter : JsonConverter
     {
+        public NamingStrategy NamingStrategy { get;  }
+
+        public DictionaryConverter(NamingStrategy namingStrategy)
+        {
+            NamingStrategy = namingStrategy;
+        }
+
+        public DictionaryConverter()
+        {
+            NamingStrategy = new PascalCaseNamingStrategy()
+            {
+                ProcessDictionaryKeys = true,
+            };
+        }
+
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             WriteValue(writer, value);
@@ -35,7 +51,8 @@ namespace Samhammer.DictionaryJsonConverter
 
             foreach (var pair in obj)
             {
-                writer.WritePropertyName(pair.Key);
+                var key = NamingStrategy.GetDictionaryKey(pair.Key);
+                writer.WritePropertyName(key);
                 WriteValue(writer, pair.Value);
             }
 
@@ -121,6 +138,7 @@ namespace Samhammer.DictionaryJsonConverter
                 {
                     case JsonToken.PropertyName:
                         var propertyName = reader.Value.ToString();
+                        propertyName = NamingStrategy.GetPropertyName(propertyName, false);
 
                         if (!reader.Read())
                         {

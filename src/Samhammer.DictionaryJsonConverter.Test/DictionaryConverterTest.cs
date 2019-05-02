@@ -80,5 +80,22 @@ namespace Samhammer.DictionaryJsonConverter.Test
             var result = JsonConvert.DeserializeObject<IDictionary<string, object>>(json, new DictionaryConverter());
             result.Should().BeEquivalentTo(expected);
         }
+
+        [Fact]
+        public void PropertiesAreDeserializedAsPascalCase()
+        {
+            var json = JsonConvert.SerializeObject(new
+            {
+                testProperty = true,
+            });
+
+            var expected = new Dictionary<string, object>()
+            {
+                { "TestProperty", true },
+            };
+
+            var result = JsonConvert.DeserializeObject<IDictionary<string, object>>(json, new DictionaryConverter());
+            result.Should().BeEquivalentTo(expected);
+        }
     }
 }
